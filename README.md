@@ -1,15 +1,28 @@
 # agent-context
 
-Kho instructions / skills / memories dùng chung cho Claude Code và Codex. Thiết kế: xem [PLAN.md](PLAN.md).
+Kho instructions / skills / memories dùng chung cho Claude Code và Codex. Script `agentctx.py` (chỉ dùng stdlib, chạy bằng `uv run`) render nội dung đó ra định dạng riêng của từng agent.
 
-> **Trạng thái: CHỈ ĐỌC ở user-level (từ 2026-10-01).** Profile đang set `write_user_level = false`, nên
-> `sync` không ghi vào `~/.claude/CLAUDE.md` / `~/.codex/AGENTS.md` nữa — `layers/global` và `layers/users/<u>`
-> ở đây là snapshot, project-level (`AGENTS.md` trong từng repo) vẫn sync bình thường. Muốn bật lại: xoá dòng
-> `write_user_level = false` khỏi `~/.agentctx/profile.toml` (hoặc đặt `true`) rồi `uv run agentctx.py sync`.
+## Hai repo: công cụ (repo này) và dữ liệu của bạn
+
+Repo này chỉ chứa công cụ và `layers/global` (skill + instructions dùng chung). **Memories, instructions cá nhân và project của bạn nằm ở một repo riêng** (nên để private). Đừng bỏ qua bước này: nếu không khai `repo` trong profile, `agentctx` mặc định ghi memory vào chính bản clone này, tức vào repo public.
+
+## Cài đặt
+
+```bash
+git clone https://github.com/nhthai173/agent-context.git ~/code/agent-context   # công cụ (repo này)
+mkdir ~/code/my-context-data && git -C ~/code/my-context-data init              # dữ liệu riêng của bạn
+```
+
+Tạo `~/.agentctx/profile.toml`, rồi xem trước và chạy sync:
+
+```bash
+uv run ~/code/agent-context/agentctx.py sync --dry-run
+uv run ~/code/agent-context/agentctx.py sync
+```
 
 ## Dùng
 
-1. Tạo `~/.agentctx/profile.toml` (không commit):
+1. `~/.agentctx/profile.toml` (không commit):
    ```toml
    user = "me"
    repo = "~/code/my-context-data"          # repo riêng của bạn: memories, inbox, users/, teams/ (nơi duy nhất được ghi)
@@ -41,6 +54,6 @@ Kho instructions / skills / memories dùng chung cho Claude Code và Codex. Thi�
 
 Secret: không ghi vào repo; lưu bằng `uvx keyring set <service> <user>` (Keychain / Windows Credential Manager / Secret Service), tham chiếu bằng `uvx keyring get <service> <user>`.
 
-Test: `uv run test_agentctx.py`. Chưa làm: xác minh path skills Codex, chạy thử trên Windows/Linux, sync MCP (xem PLAN.md §11).
+Test: `uv run test_agentctx.py`. Chưa làm: xác minh path skills Codex, chạy thử trên Windows/Linux, sync MCP.
 
 Hook PreCompact nhắc agent chạy `remember` trước khi context bị nén: `layers/global/hooks/precompact-propose-memory.json` có snippet, merge key `PreCompact` vào `~/.claude/settings.json` `hooks`. `sync` không tự áp (hook chưa phải loại nội dung của layer).
