@@ -62,6 +62,6 @@ Hook PreCompact nhắc agent chạy `remember` trước khi context bị nén: `
 
 Đã chạy `test_agentctx.py` trên Windows 11 (Python 3.13, Git for Windows) và pass. Lưu ý:
 
-- Trong `profile.toml` viết đường dẫn bằng dấu `/` hoặc dấu nháy đơn (`'C:\\Users\\me\\data'`). Dấu `\\` trong nháy kép bị TOML hiểu là escape và báo lỗi.
+- Trong `profile.toml` viết đường dẫn bằng dấu `/` hoặc dấu nháy đơn (`'C:\Users\me\data'`). Dấu `\` trong nháy kép bị TOML hiểu là escape và báo lỗi.
 - Nhập memory gốc của Claude (`import`) chưa hỗ trợ đường dẫn có ổ đĩa; các lệnh còn lại không bị ảnh hưởng.
 - Chưa có `uv` thì chạy thẳng `python agentctx.py ...` (chỉ cần Python >= 3.11).
