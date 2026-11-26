@@ -1,0 +1,12 @@
+{
+  "PreCompact": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreCompact\",\"additionalContext\":\"Truoc khi context bi nen mat: neu hoi thoai nay co fact dang nho (user preference, correction, project fact) chua propose, chay agentctx.py remember (xem layers/global/instructions/propose-memory.md trong agent-context repo).\"}}'"
+        }
+      ]
+    }
+  ]
+}

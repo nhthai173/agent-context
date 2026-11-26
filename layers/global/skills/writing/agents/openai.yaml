@@ -1,0 +1,5 @@
+interface:
+  display_name: "Writing"
+  short_description: "Write and edit prose in the right tone: thesis, technical, report, correspondence"
+policy:
+  allow_implicit_invocation: true
