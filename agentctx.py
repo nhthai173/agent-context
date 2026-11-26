@@ -1044,7 +1044,30 @@ def main(argv=None):
     v.add_argument("--open", action="store_true")
     v.set_defaults(fn=cmd_viz)
     a = p.parse_args(argv)
-    return int(a.fn(a) or 0)
+    t0, rc = time.time(), 1
+    try:
+        rc = int(a.fn(a) or 0)
+        return rc
+    except SystemExit as e:
+        rc = e.code if isinstance(e.code, int) else 1
+        raise
+    finally:
+        log_call(a, rc, t0)
+
+
+def log_call(a, rc, t0):
+    """Một dòng JSON mỗi lần gọi, để phân tích sau. Không ghi nội dung text (có thể lẫn secret), chỉ độ dài."""
+    try:
+        d = {k: v for k, v in vars(a).items() if k != "fn" and v not in (None, False)}
+        if "text" in d:
+            d["text"] = len(d["text"])
+        row = dict(ts=time.strftime("%Y-%m-%dT%H:%M:%S"), cwd=os.getcwd(), rc=rc, ms=int((time.time() - t0) * 1000), args=d)
+        f = Path(os.environ.get("AGENTCTX_HOME", HOME / ".agentctx")) / "log.jsonl"
+        f.parent.mkdir(parents=True, exist_ok=True)
+        with f.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")  # ponytail: không xoay file; cắt tay khi to
+    except Exception:
+        pass  # log hỏng không được làm hỏng lệnh
 
 
 if __name__ == "__main__":

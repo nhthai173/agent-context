@@ -272,4 +272,15 @@ assert set(sk) == {"s", "sh"} and sk["s"].resolve() == (repo / "layers/global/sk
 assert any(t == "Z" for t, _ in A.layer_instructions(repo, "global", "claude")), "shared instructions are read"
 assert not A.layer_memories(shared, "global"), "shared repo has no memories"
 
+# log mỗi lệnh gọi: ghi dòng JSON, không lộ nội dung text
+A.main(["lint"])
+logf = tmp / "home/.agentctx/log.jsonl"
+row = json.loads(logf.read_text().splitlines()[-1])
+assert row["args"]["cmd"] == "lint" and row["rc"] in (0, 1) and "ms" in row and "cwd" in row, "lint is logged"
+try:
+    A.main(["remember", "SECRET-FACT-XYZ", "--type", "user", "--reason", "r", "--to", "nowhere/x"])
+except BaseException:
+    pass
+assert "SECRET-FACT-XYZ" not in logf.read_text(), "fact text never logged, only its length"
+
 print("ok")
