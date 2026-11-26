@@ -34,7 +34,7 @@ for d, url in ((proj, "https://github.com/x/p"), (clone2, "git@github.com:X/P.gi
 git(proj, "worktree", "add", "-q", str(ws / "proj-wt"))
 (clone2 / "CLAUDE.md").write_text("# own notes\n")
 other_repo = ws / "unrelated"; other_repo.mkdir(); git(other_repo, "init", "-q")
-(tmp / "profile.toml").write_text(f'user="me"\nrepo="{repo}"\nteams=["t"]\nscan=["{ws}"]\n')
+(tmp / "profile.toml").write_text(f'user="me"\nrepo="{repo.as_posix()}"\nteams=["t"]\nscan=["{ws.as_posix()}"]\n')
 
 claude = A.HOME / ".claude/CLAUDE.md"
 codex = A.HOME / ".codex/AGENTS.md"
@@ -193,10 +193,11 @@ w("layers/global/skills/kept/SKILL.md", "---\nname: kept\ndescription: d\n---\no
 assert A.main(["sync"]) == 0 and not (tracked / ".agentctx").exists() and (tracked / "SKILL.md").read_text().endswith("x")
 (repo / "layers/global/skills/kept/SKILL.md").unlink(); (repo / "layers/global/skills/kept").rmdir()
 
-spaced = tmp / "App Scripts/Smart Wallet"; spaced.mkdir(parents=True)  # no transcript: decode dir name
-(tmp / "App-Scripts").mkdir()                                           # decoy that encodes the same prefix
-enc = "-" + "-".join(__import__("re").sub(r"[^A-Za-z0-9]", "-", p) for p in spaced.resolve().parts[1:])
-assert A.decode_project_dir(enc) == spaced.resolve(), "decodes dir names containing spaces"
+if sys.platform != "win32":  # decode_project_dir is POSIX-only (ponytail note in agentctx.py)
+    spaced = tmp / "App Scripts/Smart Wallet"; spaced.mkdir(parents=True)  # no transcript: decode dir name
+    (tmp / "App-Scripts").mkdir()                                           # decoy that encodes the same prefix
+    enc = "-" + "-".join(__import__("re").sub(r"[^A-Za-z0-9]", "-", p) for p in spaced.resolve().parts[1:])
+    assert A.decode_project_dir(enc) == spaced.resolve(), "decodes dir names containing spaces"
 
 assert A.main(["project", "add", str(other_repo), "--owner", "users/me"]) == 0
 assert (repo / "layers/users/me/projects/unrelated/project.toml").exists()
@@ -239,7 +240,7 @@ with contextlib.redirect_stdout(io.StringIO()) as buf:
     A.main(["status"])
 assert "skill-drift" in buf.getvalue()
 
-(tmp / "profile.toml").write_text(f'user="me"\nrepo="{repo}"\nteams=["t"]\nscan=["{ws}"]\nwrite_user_level=false\n')
+(tmp / "profile.toml").write_text(f'user="me"\nrepo="{repo.as_posix()}"\nteams=["t"]\nscan=["{ws.as_posix()}"]\nwrite_user_level=false\n')
 assert A.main(["sync"]) == 0
 assert "global rule" not in claude.read_text() and "global rule" not in codex.read_text(), "write_user_level=false clears user-level files"
 assert f"{A.BEGIN}\n{A.END}" in claude.read_text() and codex.read_text() == f"{A.BEGIN}\n{A.END}\n", "block cleared, hand-written content around it kept"
@@ -263,7 +264,7 @@ for rel, t in (("layers/global/skills/sh/SKILL.md", "---\nname: sh\ndescription:
                ("layers/global/skills/s/SKILL.md", "---\nname: s\ndescription: x\n---\nshared copy"),
                ("layers/global/instructions/z.md", "---\ntitle: Z\n---\nshared rule")):
     p = shared / rel; p.parent.mkdir(parents=True, exist_ok=True); p.write_text(t)
-(tmp / "profile.toml").write_text(f'user="me"\nrepo="{repo}"\nshared=["{shared}"]\nteams=["t"]\nscan=["{ws}"]\n')
+(tmp / "profile.toml").write_text(f'user="me"\nrepo="{repo.as_posix()}"\nshared=["{shared.as_posix()}"]\nteams=["t"]\nscan=["{ws.as_posix()}"]\n')
 w("layers/global/skills/s/SKILL.md", "---\nname: s\ndescription: x\n---\nmain copy")
 prof = A.load_profile()
 sk = dict(A.layer_skills(repo, "global", "claude"))

@@ -57,3 +57,11 @@ Secret: không ghi vào repo; lưu bằng `uvx keyring set <service> <user>` (Ke
 Test: `uv run test_agentctx.py`. Chưa làm: xác minh path skills Codex, chạy thử trên Windows/Linux, sync MCP.
 
 Hook PreCompact nhắc agent chạy `remember` trước khi context bị nén: `layers/global/hooks/precompact-propose-memory.json` có snippet, merge key `PreCompact` vào `~/.claude/settings.json` `hooks`. `sync` không tự áp (hook chưa phải loại nội dung của layer).
+
+## Windows
+
+Đã chạy `test_agentctx.py` trên Windows 11 (Python 3.13, Git for Windows) và pass. Lưu ý:
+
+- Trong `profile.toml` viết đường dẫn bằng dấu `/` hoặc dấu nháy đơn (`'C:\\Users\\me\\data'`). Dấu `\\` trong nháy kép bị TOML hiểu là escape và báo lỗi.
+- Nhập memory gốc của Claude (`import`) chưa hỗ trợ đường dẫn có ổ đĩa; các lệnh còn lại không bị ảnh hưởng.
+- Chưa có `uv` thì chạy thẳng `python agentctx.py ...` (chỉ cần Python >= 3.11).

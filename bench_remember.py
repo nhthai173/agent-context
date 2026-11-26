@@ -49,7 +49,7 @@ def sandbox(tag, SRC):
         d = scan / f"proj{i}"; d.mkdir(parents=True)
         sh("git", "-C", str(d), "init", "-q"); sh("git", "-C", str(d), "remote", "add", "origin", f"https://x/p{i}.git")
         (d / "AGENTS.md").write_text("x")
-    (B / "profile.toml").write_text(f'user = "me"\nrepo = "{B/"repo"}"\nagents = ["claude"]\nteams = []\nscan = ["{scan}"]\n')
+    (B / "profile.toml").write_text(f'user = "me"\nrepo = "{(B/"repo").as_posix()}"\nagents = ["claude"]\nteams = []\nscan = ["{Path(scan).as_posix()}"]\n')
     env = dict(os.environ, HOME=str(B / "home"), AGENTCTX_HOME=str(B / "home/.agentctx"),
                AGENTCTX_PROFILE=str(B / "profile.toml"), UV_CACHE_DIR=str(Path.home() / ".cache/uv"))
     sh("uv", "run", str(B / "repo/agentctx.py"), "project", "add", *[str(p) for p in scan.iterdir()], "--owner", "users/me", env=env)
